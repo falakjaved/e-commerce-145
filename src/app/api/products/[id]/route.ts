@@ -1,19 +1,22 @@
-import { prisma } from "@/lib/prisma";
-import { unlink } from "fs/promises";
-import path from "path";
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 
 export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
-  const product = await prisma.product.findUnique({
-    where: { id: params.id },
-  });
+  const { id } = await context.params
 
-  if (product) {
-    await unlink(path.join("public", product.image)).catch(() => {});
-    await prisma.product.delete({ where: { id: params.id } });
+  try {
+    await prisma.product.delete({
+      where: { id },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Product delete failed" },
+      { status: 500 }
+    )
   }
-
-  return Response.json({ success: true });
 }
