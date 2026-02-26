@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
+import { Product } from "@prisma/client";
 
 export default async function Home() {
-  const products = await prisma.product.findMany({
+  const products: Product[] = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
   });
 
